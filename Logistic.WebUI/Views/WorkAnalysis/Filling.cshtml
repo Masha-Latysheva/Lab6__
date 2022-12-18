@@ -1,0 +1,21 @@
+﻿@model List<(string, int)>
+
+<div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Тариф</th>
+                <th>Средняя загрузка (вес)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Item1</td>
+                    <td>@item.Item2 %</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

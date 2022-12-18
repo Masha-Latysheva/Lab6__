@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logistic</title>
+    <link rel="stylesheet" href="wwwroot/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="wwwroot/css/site.css" />
+</head>
+<body style="width: 100%; height: 100%; padding: 0 0 0 0; margin: 0 0 0 0;">
+<div>
+    <div class="modal" id="addUnitRoleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title-text"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeAddUnitRoleModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form class="row g-3 needs-validation" action="javascript:void(0);">
+                            <div class="col-md-4" id="addUnitRoleModalContent">
+                                <input hidden="hidden" id="id-item">
+                                <label for="name-modal-item" class="form-label">Наименование</label>
+                                <input class="form-control" id="name-modal-item" style="width: 400px"/>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <button class="btn btn-success" type="submit" onclick="createUnitRoleBtnHandler()">ОК</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div>
+            <div class="row">
+                <a class="btn btn-outline-secondary mt-3 col-3 mr-1" href="route.html">Маршруты</a>
+                <a class="btn btn-outline-secondary mt-3 col-3" href="point.html">Остановки</a>
+            </div>
+            <a class="btn btn-outline-secondary mt-3" onclick="openCreateModal()">Создать</a>
+            <table class="table table-striped mt-3">
+                <thead>
+                <tr>
+                    <th>
+                        Id
+                    </th>
+                    <th>
+                        Наименование
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="route-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+<script src="wwwroot/lib/jquery/dist/jquery.min.js"></script>
+<script src="wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="wwwroot/js/site.js"></script>
+<script>
+    function createUnitRoleBtnHandler() {
+        const idVal = $("#id-item").val();
+        const nameVal = $("#name-modal-item").val();
+
+        if ($("#modal-title-text")[0].innerHTML === 'Изменение') {
+            $.ajax({
+                type: 'PUT',
+                url: 'https://localhost:44360/Point',
+                data: '{"Id": ' + idVal +
+                    ', "Name": "' + nameVal + '"}',
+                success: function() {
+                    closeAddUnitRoleModal();
+                    updateTable();
+                },
+                contentType: "application/json",
+                dataType: 'json'
+            })
+            return
+        }
+        $.ajax({
+            type: 'POST',
+            url: 'https://localhost:44360/Point',
+            data: '{"Name":"' + nameVal + '"}',
+            success: function() {
+                closeAddUnitRoleModal();
+                updateTable();
+            },
+            contentType: "application/json",
+            dataType: 'json'
+        })
+    }
+
+    function openCreateModal() {
+        $("#modal-title-text")[0].innerHTML = 'Добавление'
+        $('#addUnitRoleModal').show()
+    }
+
+    function closeAddUnitRoleModal() {
+        $('#addUnitRoleModal').hide()
+    }
+
+    function onDelete(id) {
+        $.ajax({
+            type: 'DELETE',
+            url: "https://localhost:44360/Point?id=" + id,
+            success: function () {
+                updateTable();
+            }
+        })
+    }
+
+    function updateTable() {
+        $.get("https://localhost:44360/Point", function (data) {
+            const trackTableBody = $("#route-table-body");
+            trackTableBody.empty()
+            for (let i = 0; i < data.length; i++) {
+                trackTableBody.append(
+                    `<tr>
+                    <td>${data[i].id}</td>
+                    <td>${data[i].name}</td>
+                    <td>
+                        <a onclick="onDelete(${data[i].id})" class="btn btn-outline-secondary">Удалить</a>
+                        <a onclick="onEdit(${data[i].id}, '${data[i].name}')" class="btn btn-outline-secondary">Изменить</a>
+                    </td>
+                    </tr>`)
+            }
+        })
+    }
+
+    function onEdit(id, name) {
+        fillModalWithData(id, name);
+    }
+
+    function fillModalWithData(id, name) {
+        openCreateModal();
+        $("#modal-title-text")[0].innerHTML = 'Изменение'
+        $("#id-item").val(id);
+
+        $("#name-modal-item").val(name);
+    }
+
+    $(document).ready(function () {
+        updateTable();
+    })
+</script>
+</html>

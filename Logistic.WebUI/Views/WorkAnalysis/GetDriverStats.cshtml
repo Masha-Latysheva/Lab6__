@@ -1,0 +1,21 @@
+﻿@model List<(string,int,List<(string,int)>)>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Водитель</th>
+            <th>Количество перевозок</th>
+            <th>Тарифы</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Item1</td>
+                <td>@item.Item2</td>
+                <td>@string.Join(',', item.Item3.Select(x => $"{x.Item1}: {x.Item2}"))</td>
+            </tr>
+        }
+    </tbody>
+</table>

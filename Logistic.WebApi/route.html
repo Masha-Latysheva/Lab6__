@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logistic</title>
+    <link rel="stylesheet" href="wwwroot/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="wwwroot/css/site.css" />
+</head>
+<body style="width: 100%; height: 100%; padding: 0 0 0 0; margin: 0 0 0 0;">
+<div>
+    <div class="modal" id="addUnitRoleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title-text"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeAddUnitRoleModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <form class="row g-3 needs-validation" action="javascript:void(0);">
+                            <div class="col-md-4" id="addUnitRoleModalContent">
+                                <input hidden="hidden" id="id-item">
+                                <label for="from-points-modal-container" class="form-label">Откуда</label>
+                                <select class="form-control" id="from-points-modal-container">
+
+                                </select>
+                                <label for="to-points-modal-container" class="form-label">Куда</label>
+                                <select class="form-control" id="to-points-modal-container">
+
+                                </select>
+                                <label for="route-length-modal-item" class="form-label">Длина маршрута</label>
+                                <input class="form-control" id="route-length-modal-item" type="number"/>
+                                <label for="name-modal-item" class="form-label">Наименование</label>
+                                <input class="form-control" id="name-modal-item"/>
+                            </div>
+                            <div class="col-12 mt-2">
+                                <button class="btn btn-success" type="submit" onclick="createUnitRoleBtnHandler()">ОК</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div>
+            <div class="row">
+                <a class="btn btn-outline-secondary mt-3 col-3 mr-1" href="point.html">Остановки</a>
+                <a class="btn btn-outline-secondary mt-3 col-3" href="organization.html">Организации</a>
+            </div>
+            <a class="btn btn-outline-secondary mt-3" onclick="openCreateModal()">Создать</a>
+            <table class="table table-striped mt-3">
+                <thead>
+                <tr>
+                    <th>
+                        Id
+                    </th>
+                    <th>
+                        Наименование
+                    </th>
+                    <th>
+                        Длина маршрута (км)
+                    </th>
+                    <th>
+                        Откуда
+                    </th>
+                    <th>
+                        Куда
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="route-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+<script src="wwwroot/lib/jquery/dist/jquery.min.js"></script>
+<script src="wwwroot/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="wwwroot/js/site.js"></script>
+<script>
+    function createUnitRoleBtnHandler() {
+        const idVal = $("#id-item").val();
+        const fromVal = $("#from-points-modal-container").val();
+        const toVal = $("#to-points-modal-container").val();
+        const routeLengthVal = $("#route-length-modal-item").val();
+        const nameVal = $("#name-modal-item").val();
+
+        if ($("#modal-title-text")[0].innerHTML === 'Изменение') {
+            $.ajax({
+                type: 'PUT',
+                url: 'https://localhost:44360/Route',
+                data: '{"Id": ' + idVal + ', "RouteLength":' + routeLengthVal +
+                    ', "Name":"' + nameVal + '"' +
+                    ', "StartPointId":' + fromVal +
+                    ', "EndPointId": ' + toVal + '}',
+                success: function() {
+                    closeAddUnitRoleModal();
+                    updateTable();
+                },
+                contentType: "application/json",
+                dataType: 'json'
+            })
+            return
+        }
+        $.ajax({
+            type: 'POST',
+            url: 'https://localhost:44360/Route',
+            data: '{"RouteLength":' + routeLengthVal +
+                ', "Name":"' + nameVal + '"' +
+                ', "StartPointId":' + fromVal +
+                ', "EndPointId": ' + toVal + '}',
+            success: function() {
+                closeAddUnitRoleModal();
+                updateTable();
+            },
+            contentType: "application/json",
+            dataType: 'json'
+        })
+    }
+
+    function openCreateModal() {
+        $("#modal-title-text")[0].innerHTML = 'Добавление'
+        $.get("https://localhost:44360/Route/Points", function (data) {
+            const fromModalContainer = $("#from-points-modal-container");
+            const toModalContainer = $("#to-points-modal-container");
+            fromModalContainer.empty()
+            toModalContainer.empty()
+            for (let i = 0; i < data.length; i++) {
+                fromModalContainer.append(
+                    `<option value="${data[i].id}">${data[i].name}</option>`)
+                toModalContainer.append(
+                    `<option value="${data[i].id}">${data[i].name}</option>`)
+            }
+        })
+        $('#addUnitRoleModal').show()
+    }
+
+    function closeAddUnitRoleModal() {
+        $('#addUnitRoleModal').hide()
+    }
+
+    function onDelete(id) {
+        $.ajax({
+            type: 'DELETE',
+            url: "https://localhost:44360/Route?id=" + id,
+            success: function () {
+                updateTable();
+            }
+        })
+    }
+
+    function updateTable() {
+        $.get("https://localhost:44360/Route", function (data) {
+            const trackTableBody = $("#route-table-body");
+            trackTableBody.empty()
+            for (let i = 0; i < data.length; i++) {
+                trackTableBody.append(
+                    `<tr>
+                    <td>${data[i].id}</td>
+                    <td>${data[i].name}</td>
+                    <td>${data[i].routeLength}</td>
+                    <td>${data[i].startPoint}</td>
+                    <td>${data[i].endPoint}</td>
+                    <td>
+                        <a onclick="onDelete(${data[i].id})" class="btn btn-outline-secondary">Удалить</a>
+                        <a onclick="onEdit(${data[i].id}, '${data[i].name}', ${data[i].routeLength}, ${data[i].startPointId}, ${data[i].endPointId})" class="btn btn-outline-secondary">Изменить</a>
+                    </td>
+                    </tr>`)
+            }
+        })
+    }
+
+    function onEdit(id, name, routeLength, startPoint, endPoint) {
+        fillModalWithData(id, name, routeLength, startPoint, endPoint);
+    }
+
+    function fillModalWithData(id, name, routeLength, startPoint, endPoint) {
+        openCreateModal();
+        $("#modal-title-text")[0].innerHTML = 'Изменение'
+        $("#id-item").val(id);
+
+        setTimeout(() => {
+            const fromOptions = $("#from-points-modal-container")[0].childNodes;
+
+            for (let i = 0; i < fromOptions.length; i++) {
+                if (Number(fromOptions[i].value) === Number(startPoint)) {
+                    fromOptions[i].selected = true
+                    break
+                }
+            }
+
+            const toOptions = $("#to-points-modal-container")[0].childNodes;
+
+            for (let i = 0; i < toOptions.length; i++) {
+                if (Number(toOptions[i].value) === Number(endPoint)) {
+                    toOptions[i].selected = true
+                    break
+                }
+            }
+        }, 300)
+
+        $("#to-points-modal-container").val(endPoint);
+        $("#route-length-modal-item").val(routeLength);
+        $("#name-modal-item").val(name);
+    }
+
+    $(document).ready(function () {
+        updateTable();
+    })
+</script>
+</html>

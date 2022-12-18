@@ -1,0 +1,30 @@
+﻿<div class="container">
+    <div class="row">
+        <div class="col-2">
+            <p>От:</p>
+            <input type="date" id="startDate" class="form-control"/>
+        </div>
+        <div class="col-2">
+            <p>До:</p>
+            <input type="date" id="endDate" class="form-control"/>
+        </div>
+        <div class="col-2">
+            <a class="btn btn-outline-secondary" onclick="renderData()">Найти</a>
+        </div>
+    </div>
+    <div id="data-container">
+
+    </div>
+</div>
+
+<script>
+    function renderData() {
+        const startDate = $("#startDate").val();
+        const endDate = $("#endDate").val();
+
+        $.get("ReportData?startDate=" + startDate + "&endDate=" + endDate, function (data)
+        {
+            $("#data-container").html(data)
+        })
+    }
+</script>

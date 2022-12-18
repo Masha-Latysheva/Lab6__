@@ -1,0 +1,35 @@
+﻿@model List<(string,string,int,int,DateTime)>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>
+            Маршрут
+        </th>
+        <th>
+            Дата
+        </th>
+        <th>
+            Тариф
+        </th>
+        <th>
+            Сумма по объему
+        </th>
+        <th>
+            Сумма по весу
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Item1</td>
+            <td>@item.Item5</td>
+            <td>@item.Item2</td>
+            <td>@item.Item3</td>
+            <td>@item.Item4</td>
+        </tr>
+    }
+    </tbody>
+</table>
